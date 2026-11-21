@@ -202,6 +202,9 @@ about_page <- fluidRow(column(
       tags$a("Plotly", href = "https://plotly.com/r/", target = "_blank", rel = "noopener noreferrer"),
       " for interactive charts. Package versions are recorded in renv.lock."
     ),
+    tags$p(
+      "The application builds on an earlier project developed by the author and was revised and extended with AI assistance."
+    ),
     tags$h3("Author"),
     tags$div(
       class = "author-details",

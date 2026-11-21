@@ -7,6 +7,9 @@ active establishment stock and administrative register events in
 La Seyne-sur-Mer, France. It uses a validated, privacy-filtered local snapshot
 derived from the official INSEE SIRENE register.
 
+The application builds on an earlier project developed by the author and was
+revised and extended with AI assistance.
+
 ## Features
 
 - interactive Leaflet map with proportional circles for privacy-aware 500 m
