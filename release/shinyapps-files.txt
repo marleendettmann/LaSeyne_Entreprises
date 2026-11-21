@@ -1,0 +1,10 @@
+global.R
+server.R
+ui.R
+R/app_runtime.R
+data/app/insee_2026-11-17_grid500_privacy_v6_simplified/stock_aggregates.rds
+data/app/insee_2026-11-17_grid500_privacy_v6_simplified/spatial_aggregates.rds
+data/app/insee_2026-11-17_grid500_privacy_v6_simplified/history_yearly.rds
+data/app/insee_2026-11-17_grid500_privacy_v6_simplified/creation_year_top8.rds
+www/Logo_sRGB_WEB.jpg
+www/styles.css
