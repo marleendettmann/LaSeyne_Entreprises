@@ -313,8 +313,12 @@ more than one candidate.
 - `unmatched`: no usable result or no geocodable public street;
 - `restricted`: at least one diffusion level is not `O`; no request is made.
 
-Only `address_exact` retains coordinates publicly. All other classes have
-missing public coordinates. No jitter or artificial displacement is applied.
+Precise geocoding coordinates are retained only in the internal preparation
+workflow and are never published as establishment locations. The public map
+contains only released spatial aggregates and their deterministic display
+anchors. Those anchors are derived from grid and land geometry, not from an
+individual establishment coordinate. No individual establishment coordinates
+are included in the public runtime.
 
 ## Validated result and privacy review
 

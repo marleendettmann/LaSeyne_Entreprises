@@ -14,8 +14,9 @@ The public runtime uses the versioned bundle
   cells, representing 4,272 establishments;
 - `history_yearly.rds`: the unchanged municipality-wide annual register-event
   series for 1973–2026;
-- `creation_year_top8.rds`: exactly 96 approved values for 2015–2026 and the
-  eight largest current NAF sections.
+- `creation_year_top8.rds`: the additional reviewed file in the existing
+  v6-named bundle, containing exactly 96 approved values for 2015–2026 and the eight
+  largest current NAF sections.
 
 The public bundle contains neither `history_section_3year.rds` nor the complete
 `creation_year_section` table. Historical events have no public economic-section
@@ -59,12 +60,13 @@ universal threshold for every public statistic.
 `renv.lock` records R 4.4.2. The public app performs no live SIRENE, BAN or IGN
 request.
 
-The complete public tree from commit `6da3c4a` was tested in a fresh
-`rocker/r-ver:4.4.2` container on Linux/aarch64. `renv::restore()` completed with
-an empty temporary cache and library; all 120 lockfile package versions were
-confirmed. The 160 public tests, application construction and HTTP start passed.
-The final server start ran with networking disabled, no project or home-directory
-mount, no host R library and no internal data.
+The complete public tree from commit
+`c5ce35119c6ac92c5d2fb182da956078346c7c07` was tested in a clean
+`rocker/r-ver:4.4.2` container on Linux/aarch64. All 120 lockfile package
+versions were confirmed and `renv::restore()` completed successfully. All 278
+public tests passed, the running application returned HTTP 200 and the offline
+server start passed. The container used no host mounts and required no internal
+data.
 
 The repository can start and test the app from the four supplied aggregate
 files. It does not claim an end-to-end public rebuild of those aggregates:

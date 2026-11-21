@@ -140,8 +140,7 @@ shiny::runApp(".")
 
 The app loads only `stock_aggregates.rds`, `spatial_aggregates.rds`, the
 byte-identical existing `history_yearly.rds` and the approved 96-row
-`creation_year_top8.rds` from the versioned,
-publication-safe bundle in
+`creation_year_top8.rds` extension from the publication-safe bundle in
 `data/app/insee_2026-11-17_grid500_privacy_v6_simplified/`. It does not require internal raw,
 processed, reference or geocoding-cache directories.
 
@@ -183,12 +182,12 @@ never refreshes its data automatically. A new reference date requires an
 explicit authenticated pipeline run, validation and creation of a new
 versioned public snapshot.
 
-The public tree from commit `6da3c4a` was validated in a fresh
-`rocker/r-ver:4.4.2` Docker environment on Linux/aarch64. `renv::restore()` used
-an empty temporary cache and library; all 120 lockfile package versions were
-confirmed, all 160 public tests passed, and the app returned HTTP 200. A final
-server start also succeeded with container networking disabled and without host
-package libraries or internal data. This validates installation and execution
+The public tree from commit `c5ce35119c6ac92c5d2fb182da956078346c7c07` was
+validated in a clean `rocker/r-ver:4.4.2` Docker environment on Linux/aarch64.
+`renv::restore()` completed successfully and all 120 lockfile package versions
+were confirmed. All 278 public tests passed, the app returned HTTP 200, and a
+final offline server start succeeded. The container used no host mounts and
+required no internal data. This validates installation and execution
 of the supplied public aggregates; it does not reproduce the separate internal
 INSEE extraction, establishment-level processing, geocoding or spatial build.
 

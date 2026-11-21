@@ -4,7 +4,7 @@ Vergleichsstand: 17.11.2026
 
 ## Zusammenfassung
 
-Die bisherige App verwendete bei jedem Start `dataseed-sirene_mde.csv`. Die neue lokale Version lädt ausschließlich das versionierte öffentliche App-Bundle unter `data/app/insee_2026-11-17_grid500_privacy_v6_simplified/`. Es übernimmt die validierten räumlichen Aggregate unverändert und enthält nur gemeindeweite historische Jahreswerte sowie gemeindeweite Erstellungszeitraum-Kohorten. Die App führt beim Start keine INSEE-, BAN- oder IGN-Anfragen aus. Die ursprüngliche CSV bleibt unverändert erhalten.
+Die bisherige App verwendete bei jedem Start `dataseed-sirene_mde.csv`. Die neue lokale Version lädt ausschließlich das versionierte öffentliche App-Bundle unter `data/app/insee_2026-11-17_grid500_privacy_v6_simplified/`. Es übernimmt die validierten räumlichen Aggregate unverändert und enthält gemeindeweite historische Jahreswerte, gemeindeweite Erstellungszeitraum-Kohorten sowie den freigegebenen Jahr-Branche-Vergleich für die acht größten Wirtschaftsabschnitte. Die App führt beim Start keine INSEE-, BAN- oder IGN-Anfragen aus. Die ursprüngliche CSV bleibt unverändert erhalten.
 
 ## Bestandskennzahlen
 
@@ -59,12 +59,13 @@ Die historische Tabelle ist eine retrospektive Rekonstruktion aus dem aktuellen 
 
 - Das Flächendiagramm bleibt bestehen und kann zwischen administrativen Erstellungen, Schließungen und Wiedereröffnungen wechseln.
 - Das Jahresbalkendiagramm zeigt nun die drei methodisch getrennten Registerereignisse statt eines aktuellen Aktiv/geschlossen-Status nach Erstellungsjahr.
-- Das frühere Jahr-Branche-Diagramm wurde durch sieben gemeindeweite Erstellungszeitraum-Kohorten des am 17.11.2026 aktiven Bestands ersetzt. Geschlossene Betriebsstätten sind darin nicht enthalten; der Wert 1900 wird als unbekannt oder nicht bestimmbar behandelt.
+- Die aktuelle App enthält wieder einen Jahr-Branche-Vergleich für die acht größten Wirtschaftsabschnitte. Der Jahresregler umfasst 2015–2026. Das Diagramm beschreibt die registrierten Erstellungsjahre der am 17.11.2026 noch aktiven Betriebsstätten; die vollständige interne Jahr-Branche-Tabelle bleibt unveröffentlicht.
+- Die sieben gemeindeweiten Erstellungszeitraum-Kohorten bleiben Bestandteil der öffentlichen Bestandsaggregate, werden aber nicht als eigenständiges Diagramm dargestellt. Geschlossene Betriebsstätten sind darin nicht enthalten; der Wert 1900 wird als unbekannt oder nicht bestimmbar behandelt.
 
 ## Unveränderte Bedienlogik
 
-Die semantic.dashboard-Navigation, Kennzahlenboxen, Leaflet-Karte,
-Die Branchenauswahl der Karte und die Radioauswahl der jährlichen Gesamtzeitreihe bleiben erhalten. Historische Branchenfilter und der Jahresslider des früheren Jahr-Branche-Diagramms wurden aus Datenschutzgründen entfernt.
+Die semantic.dashboard-Navigation, Kennzahlenboxen und Leaflet-Karte bleiben erhalten.
+Die Branchenauswahl der Karte und die Radioauswahl der jährlichen Gesamtzeitreihe bleiben ebenfalls erhalten. Der Jahr-Branche-Vergleich besitzt einen Jahresregler für 2015–2026, ist jedoch auf die acht größten Wirtschaftsabschnitte und die minimierte öffentliche Top-8-Tabelle beschränkt. Die vollständige interne Jahr-Branche-Tabelle und historische Branchenfilter werden nicht veröffentlicht.
 Die finale Navigation trennt Dashboard, Methodology and Data und About. Die Karte
 zeigt proportionale Kreise an festen Rasterankern; die Auswahl „Reopenings“ und
 der Datenschutzhinweis bleiben erhalten.
