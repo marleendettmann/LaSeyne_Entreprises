@@ -3,6 +3,9 @@ required_section_stock_fields <- c(
   "spatial_released_count"
 )
 required_creation_cohort_fields <- c("cohort", "count")
+required_creation_year_top8_fields <- c(
+  "creation_year", "section_code", "section_label", "count", "incomplete_year"
+)
 required_geocoding_flow_fields <- c("category", "count")
 required_spatial_aggregate_fields <- c(
   "grid_id", "section_code", "count", "anchor_longitude", "anchor_latitude"
@@ -113,13 +116,69 @@ validate_public_history_yearly <- function(history) {
   runtime_validation(errors)
 }
 
-validate_public_runtime_data <- function(stock, spatial, history) {
+validate_public_creation_year_top8 <- function(data, section_stock) {
+  errors <- character()
+  if (!is.data.frame(data) ||
+      !identical(names(data), required_creation_year_top8_fields)) {
+    return(runtime_validation("The public Top-8 creation-year schema is not permitted."))
+  }
+  expected_sections <- c("L", "G", "S", "F", "Q", "M", "N", "R")
+  expected_counts <- c(
+    46L, 63L, 50L, 33L, 25L, 23L, 14L, 22L,
+    62L, 58L, 46L, 38L, 28L, 21L, 19L, 22L,
+    127L, 60L, 37L, 38L, 34L, 13L, 19L, 24L,
+    126L, 76L, 26L, 35L, 35L, 28L, 13L, 24L,
+    175L, 63L, 57L, 64L, 67L, 46L, 27L, 21L,
+    167L, 89L, 52L, 65L, 53L, 37L, 27L, 23L,
+    225L, 89L, 70L, 77L, 61L, 57L, 48L, 18L,
+    213L, 77L, 69L, 93L, 79L, 67L, 44L, 39L,
+    180L, 83L, 86L, 116L, 95L, 86L, 45L, 35L,
+    257L, 145L, 118L, 160L, 91L, 121L, 120L, 54L,
+    281L, 176L, 157L, 169L, 132L, 155L, 146L, 45L,
+    220L, 206L, 180L, 182L, 106L, 160L, 148L, 62L
+  )
+  expected_grid <- expand.grid(
+    creation_year = 2015:2026, section_code = expected_sections,
+    KEEP.OUT.ATTRS = FALSE, stringsAsFactors = FALSE
+  )
+  observed_grid <- data[c("creation_year", "section_code")]
+  observed_grid <- observed_grid[order(observed_grid$creation_year,
+                                       match(observed_grid$section_code, expected_sections)), ]
+  expected_grid <- expected_grid[order(expected_grid$creation_year,
+                                       match(expected_grid$section_code, expected_sections)), ]
+  rownames(observed_grid) <- NULL
+  rownames(expected_grid) <- NULL
+  ranked <- section_stock[order(-section_stock$active_count,
+                                section_stock$section_code), ]
+  labels <- stats::setNames(section_stock$section_label, section_stock$section_code)
+  if (nrow(data) != 96L || anyDuplicated(observed_grid) ||
+      !identical(observed_grid, expected_grid)) {
+    errors <- c(errors, "The Top-8 table must contain the complete 2015-2026 grid.")
+  }
+  if (!identical(head(ranked$section_code, 8L), expected_sections) ||
+      sum(head(ranked$active_count, 8L)) != 11247L) {
+    errors <- c(errors, "The Top-8 ranking does not match the current active stock.")
+  }
+  if (anyNA(data) || any(data$count < 13L) ||
+      !identical(data$count, expected_counts) ||
+      !identical(data$section_label, unname(labels[data$section_code]))) {
+    errors <- c(errors, "A Top-8 value or label violates the approved release rules.")
+  }
+  expected_partial <- data$creation_year == 2026L
+  if (!identical(data$incomplete_year, expected_partial)) {
+    errors <- c(errors, "Only creation year 2026 may be marked incomplete.")
+  }
+  runtime_validation(errors)
+}
+
+validate_public_runtime_data <- function(stock, spatial, history, creation_year_top8) {
   stock_check <- validate_public_stock_aggregates(stock)
   if (!stock_check$valid) return(stock_check)
   checks <- list(
     stock_check,
     validate_public_spatial_aggregates(spatial, stock$section_stock),
-    validate_public_history_yearly(history)
+    validate_public_history_yearly(history),
+    validate_public_creation_year_top8(creation_year_top8, stock$section_stock)
   )
   runtime_validation(unlist(lapply(checks, `[[`, "errors"), use.names = FALSE))
 }
@@ -128,7 +187,8 @@ load_public_app_data <- function(bundle_dir) {
   paths <- c(
     stock = file.path(bundle_dir, "stock_aggregates.rds"),
     spatial = file.path(bundle_dir, "spatial_aggregates.rds"),
-    history = file.path(bundle_dir, "history_yearly.rds")
+    history = file.path(bundle_dir, "history_yearly.rds"),
+    creation_year_top8 = file.path(bundle_dir, "creation_year_top8.rds")
   )
   missing <- paths[!file.exists(paths)]
   if (length(missing)) {
@@ -137,13 +197,30 @@ load_public_app_data <- function(bundle_dir) {
   result <- list(
     stock = readRDS(paths[["stock"]]),
     spatial = readRDS(paths[["spatial"]]),
-    history = readRDS(paths[["history"]])
+    history = readRDS(paths[["history"]]),
+    creation_year_top8 = readRDS(paths[["creation_year_top8"]])
   )
   validation <- validate_public_runtime_data(
-    result$stock, result$spatial, result$history
+    result$stock, result$spatial, result$history, result$creation_year_top8
   )
   if (!validation$valid) stop(paste(validation$errors, collapse = " "), call. = FALSE)
   result
+}
+
+creation_year_plot_data <- function(data, year) {
+  if (length(year) != 1L || is.na(year) || year < 2015L || year > 2026L) {
+    stop("Creation year must be a single value from 2015 to 2026.", call. = FALSE)
+  }
+  selected <- data[data$creation_year == as.integer(year), , drop = FALSE]
+  if (nrow(selected) != 8L || any(selected$count < 13L)) {
+    stop("The selected Top-8 creation-year data are incomplete.", call. = FALSE)
+  }
+  selected <- selected[order(selected$count, selected$section_code), , drop = FALSE]
+  selected$section_display <- paste0(selected$section_code, " \u2013 ", selected$section_label)
+  selected$section_display <- factor(
+    selected$section_display, levels = selected$section_display
+  )
+  selected
 }
 
 filter_spatial_aggregates <- function(spatial, section_code) {
@@ -309,6 +386,15 @@ history_event_series <- function(history, event) {
     coverage_status = history$coverage_status,
     stringsAsFactors = FALSE
   )
+}
+
+history_event_plot_series <- function(history, event, start_year = -Inf) {
+  series <- history_event_series(history, event)
+  series <- series[series$year >= start_year, , drop = FALSE]
+  observed <- !is.na(series$value)
+  previous_missing <- c(TRUE, head(!observed, -1L))
+  series$observed_run <- cumsum(observed & previous_missing)
+  series[observed, , drop = FALSE]
 }
 
 create_map_home_button <- function(bounds) {

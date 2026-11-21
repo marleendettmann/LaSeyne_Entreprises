@@ -65,6 +65,6 @@ Die historische Tabelle ist eine retrospektive Rekonstruktion aus dem aktuellen 
 
 Die semantic.dashboard-Navigation, Kennzahlenboxen, Leaflet-Karte,
 Die Branchenauswahl der Karte und die Radioauswahl der jährlichen Gesamtzeitreihe bleiben erhalten. Historische Branchenfilter und der Jahresslider des früheren Jahr-Branche-Diagramms wurden aus Datenschutzgründen entfernt.
-Die finale Navigation trennt Dashboard, Methodology & Data und About. Die Karte
+Die finale Navigation trennt Dashboard, Methodology and Data und About. Die Karte
 zeigt proportionale Kreise an festen Rasterankern; die Auswahl „Reopenings“ und
 der Datenschutzhinweis bleiben erhalten.

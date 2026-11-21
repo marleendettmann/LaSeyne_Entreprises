@@ -297,7 +297,8 @@ precise BAN position types are `address_approximate`.
 
 ## Géoplateforme completion and quality classes
 
-Only public O/O addresses not matched locally and having a street value are
+Only records with O/O diffusion status that are eligible for public processing,
+not matched locally and have a street value are
 deduplicated and sent to the IGN Géoplateforme BAN address index. The run used
 2,872 unique queries at no more than 20 requests per second. Responses are
 cached internally with status, candidate count, score, type, commune and
@@ -323,8 +324,10 @@ The 14,213 active rows split into 5,214 `address_exact`, 2,703
 no establishment row or individual coordinate is part of the public runtime.
 
 The current public stock object contains section-level totals, seven
-municipality-wide creation-period cohorts and four geocoding-flow totals. It
-contains no creation-year/section table. The spatial object contains only a
+municipality-wide creation-period cohorts and four geocoding-flow totals. A
+separate 96-row table contains only the approved 2015–2026 values for the eight
+largest current sections. The complete internal creation-year/section table is
+not published. The spatial object contains only a
 synthetic grid identifier, NAF section, released count and deterministic display
 anchor. It excludes SIREN, SIRET, names, addresses, raw queries, establishment
 coordinates, detailed NAF, creation year, legal form and person type. Annual
@@ -332,8 +335,9 @@ history remains a separate aggregate table with its existing completeness flags.
 
 # Earlier less-precise geocoding experiment
 
-The optional map layer starts from the 5,925 public O/O establishments classified
-as `address_approximate` or `street_only`. Coordinates are grouped after rounding
+The earlier optional-layer experiment started from 5,925 O/O records eligible
+for public processing and classified as `address_approximate` or `street_only`.
+Coordinates are grouped after rounding
 to seven decimal places and their normalized original street labels are compared.
 When one coordinate represents more than one distinct original street, every row
 at that coordinate is excluded from the spatial layer. This removes 2,727 rows.
@@ -357,17 +361,20 @@ map described below.
 
 The spatial component now distributed in
 `grid500_privacy_v6_simplified` preserves the validated aggregate values first
-established for Variant C and replaces all public establishment rows with
-aggregates. The spatial basis is restricted to the
+established for Variant C and contains aggregates instead of establishment
+rows. The spatial-processing basis is restricted to the
 5,214 address-exact establishments whose establishment and legal-unit diffusion
 statuses are both `O`. Points are projected to Lambert-93 (`EPSG:2154`) and
 assigned to the established fixed 500 metre grid. Aggregation is by grid cell
 and official NAF rév. 2 section.
 
 A cell/section combination is released only when `n >= 5`. No uncut cell total,
-suppressed residual or complementary subtotal is published. The all-sections
-view is calculated solely by summing released cell/section combinations, so it
-cannot disclose suppressed components by subtraction. This produces 286
+suppressed residual or complementary subtotal is published for an individual
+grid cell. The all-sections map view is calculated solely by summing released
+cell/section combinations. Section-level aggregation-basis totals and released
+counts are also public, so the total threshold-excluded count can be derived for
+an economic section; those margins do not reveal how that residual is distributed
+among suppressed grid cells. This produces 286
 released combinations in 51 cells, representing 4,272 establishments; 942 of
 the address-exact basis are excluded by the threshold. Sections A, D, E and O
 have no released spatial combination and therefore display an explanatory empty
@@ -415,17 +422,18 @@ Anchor shifts are approximately 129.2, 174.3 and 206.7 metres.
 
 ## Coverage flow and final public runtime
 
-The Methodology & Data Sankey distinguishes the complete active stock (14,213),
-the address-exact O/O internal basis (5,214), released spatial aggregates
+The Methodology and Data Sankey distinguishes the complete active stock (14,213),
+the address-exact O/O internal processing basis (5,214), released spatial aggregates
 (4,272), threshold-excluded exact records (942), less-precise geocoding (5,925),
 unmatched records (719) and restricted diffusion (2,355).
 
 The public runtime bundle `insee_2026-11-17_grid500_privacy_v6_simplified`
-loads only `stock_aggregates.rds`, `spatial_aggregates.rds` and the
-byte-identical unchanged `history_yearly.rds`. It does not load establishment rows,
+loads only `stock_aggregates.rds`, `spatial_aggregates.rds`, the
+byte-identical unchanged `history_yearly.rds` and the 96-row
+`creation_year_top8.rds`. It does not load establishment rows,
 grid polygons, IGN source geometry, internal bundle metadata or geocoding
 caches, and it does not require `sf` or `jsonlite` at startup. The navigation
-remains Dashboard, Methodology & Data, and About.
+remains Dashboard, Methodology and Data, and About.
 
 Shiny automatically loads only the public schema and display helpers in
 `R/app_runtime.R`. Internal row-level validation, classification and historical
@@ -442,6 +450,11 @@ is published. The annual figures are municipality-wide retrospective register
 reconstructions rather than official business-demography births and deaths. The
 incomplete 2026 calendar year covers 1 January through 17 November.
 
+Missing event observations remain missing rather than being replaced with zero.
+For example, reopenings for 1986–1989 are unavailable in the retrospective
+reconstruction; the chart displays a gap between the observed 1985 and 1990
+values.
+
 Seventeen early annual closure or reopening values are positive and below five.
 They are retained because the complete annual series contains no economic
 section, spatial location or establishment attribute. On that coarse
@@ -456,3 +469,23 @@ cross-tabulated by economic section, grid cell, geocoding quality, legal form or
 another establishment characteristic. The SIRENE placeholder `1900-01-01` is
 assigned to the unknown or undetermined category and is never interpreted as an
 actual creation date.
+
+## Top-8 creation-year comparison
+
+The third dashboard figure uses a deliberately minimised table. The eight
+sections are selected by descending active stock at the reference date and are
+L, G, S, F, Q, M, N and R. Their current counts sum to 11,247. The published
+table contains the complete 8-by-12 grid for 2015–2026: 96 rows, no zero or
+missing combination and no value below 13. It contains only creation year,
+section code and label, count and the incomplete-year flag.
+
+The figure describes the registered creation years of establishments still
+active on 17 November 2026. It is a survivor-stock comparison, not the
+historical total of creations in each year. The complete internal
+creation-year/section table, the ten other sections and years before 2015 are
+not part of the public runtime. The table has no establishment identifier,
+geography, legal form, person type or link to the spatial aggregates. Exact
+current section totals and municipality-wide creation cohorts remain public;
+their residuals outside the displayed Top-8 window are not small cells and do
+not identify an omitted year/section value. The 2026 values cover 1 January
+through 17 November and are marked incomplete.

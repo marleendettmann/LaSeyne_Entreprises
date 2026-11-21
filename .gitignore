@@ -58,6 +58,7 @@ data/app/insee_2026-11-17_grid500_privacy_v6_simplified/**
 !data/app/insee_2026-11-17_grid500_privacy_v6_simplified/stock_aggregates.rds
 !data/app/insee_2026-11-17_grid500_privacy_v6_simplified/spatial_aggregates.rds
 !data/app/insee_2026-11-17_grid500_privacy_v6_simplified/history_yearly.rds
+!data/app/insee_2026-11-17_grid500_privacy_v6_simplified/creation_year_top8.rds
 
 # Internal analyses, generated outputs and legacy source data
 outputs/

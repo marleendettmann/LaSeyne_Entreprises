@@ -38,15 +38,56 @@ test_that("deployed R sources are locale-portable ASCII", {
   expect_true(all(vapply(bytes, function(value) all(as.integer(value) <= 127L), logical(1))))
 })
 
+test_that("runtime reload and event-control styles are deployed", {
+  project <- testthat::test_path("..", "..")
+  global_source <- paste(readLines(file.path(project, "global.R")), collapse = "\n")
+  server_source <- paste(readLines(file.path(project, "server.R")), collapse = "\n")
+  styles <- paste(readLines(file.path(project, "www/styles.css")), collapse = "\n")
+  expect_match(global_source, "required_runtime_functions", fixed = TRUE)
+  expect_match(global_source, "source(\"R/app_runtime.R\", local = TRUE", fixed = TRUE)
+  expect_match(server_source, "inline = TRUE", fixed = TRUE)
+  expect_match(styles, ".history-event-selector", fixed = TRUE)
+  expect_match(styles, "background: #27313A", fixed = TRUE)
+  expect_match(styles, ".source-footer", fixed = TRUE)
+})
+
 test_that("UI terminology matches the simplified data model", {
   project <- testthat::test_path("..", "..")
   ui_source <- paste(readLines(file.path(project, "ui.R"), encoding = "UTF-8"), collapse = "\n")
   server_source <- paste(readLines(file.path(project, "server.R"), encoding = "UTF-8"), collapse = "\n")
   expect_match(ui_source, "Establishments by economic activity", fixed = TRUE)
-  expect_match(ui_source, "Active establishments by creation period", fixed = TRUE)
+  expect_match(ui_source, "Active establishments by creation year and economic section", fixed = TRUE)
   expect_false(grepl("Companies by business activities", ui_source, fixed = TRUE))
   expect_false(grepl("select_history_section|select_history_interval", paste(ui_source, server_source)))
-  expect_match(ui_source, "Creation periods of establishments active on 17 November 2026.", fixed = TRUE)
+  expect_match(ui_source, "eight largest sections by current stock", fixed = TRUE)
+  expect_match(ui_source, '"Methodology and Data"', fixed = TRUE)
+  expect_match(ui_source, 'icon("table")', fixed = TRUE)
+  expect_match(ui_source, 'icon("bullseye")', fixed = TRUE)
+  expect_match(
+    ui_source,
+    "Annual administrative register events reconstructed from the current SIRENE snapshot.",
+    fixed = TRUE
+  )
+  expect_match(
+    ui_source,
+    "uses official INSEE SIRENE data to explore business establishments",
+    fixed = TRUE
+  )
+  expect_match(ui_source, "https://www.r-project.org/", fixed = TRUE)
+  expect_match(ui_source, "https://shiny.posit.co/", fixed = TRUE)
+  expect_match(ui_source, "https://appsilon.github.io/semantic.dashboard/", fixed = TRUE)
+  expect_match(ui_source, "https://rstudio.github.io/leaflet/", fixed = TRUE)
+  expect_match(ui_source, "https://plotly.com/r/", fixed = TRUE)
+  expect_match(
+    server_source,
+    "represented on the map",
+    fixed = TRUE
+  )
+  expect_match(
+    ui_source,
+    "Only grid cell\\u2013sector combinations with at least five establishments are shown.",
+    fixed = TRUE
+  )
 })
 
 test_that("public schema validators reject cross-schema substitutions", {
@@ -57,7 +98,13 @@ test_that("public schema validators reject cross-schema substitutions", {
   expect_true(validate_public_stock_aggregates(app$stock)$valid)
   expect_true(validate_public_spatial_aggregates(app$spatial, app$stock$section_stock)$valid)
   expect_true(validate_public_history_yearly(app$history)$valid)
+  expect_true(validate_public_creation_year_top8(
+    app$creation_year_top8, app$stock$section_stock
+  )$valid)
   expect_false(validate_public_stock_aggregates(app$spatial)$valid)
   expect_false(validate_public_history_yearly(app$stock$creation_cohorts)$valid)
   expect_false(validate_public_spatial_aggregates(app$history, app$stock$section_stock)$valid)
+  expect_false(validate_public_creation_year_top8(
+    app$history, app$stock$section_stock
+  )$valid)
 })

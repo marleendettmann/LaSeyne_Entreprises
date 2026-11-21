@@ -21,7 +21,7 @@ body {
 /* Reduced project header, aligned with DemographyDE without changing navigation. */
 .ui.dashboard-header {
   min-height: 82px;
-  background: #27313a !important;
+  background: #27313A !important;
   border-bottom: 4px solid var(--lse-action) !important;
   box-shadow: none !important;
 }
@@ -78,7 +78,7 @@ body {
 .ui.left.sidebar .item > i.icon { color: var(--lse-action) !important; }
 .ui.left.sidebar .active.item {
   color: #fff !important;
-  background: var(--lse-primary) !important;
+  background: #27313A !important;
   box-shadow: inset 3px 0 0 var(--lse-action) !important;
 }
 .ui.left.sidebar .active.item > i.icon { color: #fff !important; }
@@ -176,6 +176,69 @@ body {
 .privacy-aggregation-label .icon { margin: 0 !important; color: #467f73; }
 .modebar { top: 4px !important; right: 8px !important; }
 
+/* Single-choice register-event control, presented as accessible buttons. */
+.history-event-selector .shiny-options-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+  width: 100%;
+  margin-top: 8px;
+}
+.history-event-selector .radio-inline {
+  position: relative;
+  flex: 1 1 150px;
+  min-width: 0;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+.history-event-selector .radio-inline input[type="radio"] {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+}
+.history-event-selector .radio-inline span {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 42px;
+  padding: 8px 12px;
+  color: var(--lse-text);
+  background: #fff;
+  border: 1px solid var(--lse-border);
+  border-radius: 7px;
+  font-size: 0.84rem;
+  font-weight: 600;
+  line-height: 1.2;
+  text-align: center;
+  cursor: pointer;
+  transition: background-color 120ms ease, border-color 120ms ease,
+    color 120ms ease, box-shadow 120ms ease;
+}
+.history-event-selector .radio-inline:hover span {
+  border-color: #9b9eb4;
+  box-shadow: 0 2px 6px rgba(42, 52, 61, 0.10);
+}
+.history-event-selector .radio-inline input[type="radio"]:focus-visible + span {
+  outline: 3px solid rgba(224, 136, 0, 0.28);
+  outline-offset: 2px;
+}
+.history-event-selector .radio-inline:nth-child(1) input[type="radio"]:checked + span {
+  color: #fff;
+  background: #9b9eb4;
+  border-color: #85899f;
+}
+.history-event-selector .radio-inline:nth-child(2) input[type="radio"]:checked + span {
+  color: #26312b;
+  background: #aebe39;
+  border-color: #98a82f;
+}
+.history-event-selector .radio-inline:nth-child(3) input[type="radio"]:checked + span {
+  color: #fff;
+  background: #e08800;
+  border-color: #c77700;
+}
+
 .aggregation-explainer {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 34px minmax(0, 1fr) 34px minmax(0, 1fr);
@@ -209,8 +272,8 @@ body {
   position: absolute;
   width: 9px;
   height: 9px;
-  background: #69b3a2;
-  border: 1px solid #467f73;
+  background: #e08800;
+  border: 1px solid #c77700;
   border-radius: 50%;
 }
 .point-1 { left: 16px; top: 16px; } .point-2 { left: 47px; top: 12px; }
@@ -224,7 +287,7 @@ body {
   overflow: hidden;
 }
 .synthetic-grid .grid-cell { border: 1px solid #d4d6dc; }
-.synthetic-grid .grid-cell-2 { background: rgba(105, 179, 162, 0.28); }
+.synthetic-grid .grid-cell-2 { background: rgba(224, 136, 0, 0.24); }
 .synthetic-published-circle {
   display: flex;
   align-items: center;
@@ -232,9 +295,9 @@ body {
   width: 74px;
   height: 74px;
   margin: 6px auto 20px;
-  color: #264c44;
-  background: rgba(105, 179, 162, 0.48);
-  border: 2px solid #467f73;
+  color: #5a3500;
+  background: rgba(224, 136, 0, 0.34);
+  border: 2px solid #c77700;
   border-radius: 50%;
   font-size: 1.25rem;
   font-weight: 650;
@@ -278,6 +341,35 @@ body {
   height: auto;
 }
 
+.author-details {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  margin-bottom: 14px;
+}
+.author-details strong { font-size: 1.05rem; }
+.author-details span { display: block; }
+
+/* Shared source footer; deliberately not a card or additional content panel. */
+.source-footer {
+  clear: both;
+  margin: 28px 0 6px;
+  padding: 13px 4px 2px;
+  color: #6b737c;
+  border-top: 1px solid #d9dae2;
+  font-size: 0.78rem;
+  line-height: 1.5;
+  text-align: left;
+}
+.source-footer p { margin: 0; }
+.source-footer a {
+  color: #59636d;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.source-footer a:hover,
+.source-footer a:focus { color: var(--lse-action-hover); }
+
 /* Released 500 m cells are contextual guides, visible only at close zoom. */
 .leaflet-container .released-grid-cell {
   stroke-opacity: 0 !important;
@@ -292,7 +384,7 @@ body {
 }
 
 @media (max-width: 900px) {
-  #plot3 { height: 1100px !important; }
+  #plot3 { height: 520px !important; }
   .modebar { transform: scale(0.9); transform-origin: top right; }
   .ui.dashboard-header { min-height: 72px; }
   .ui.dashboard-header .dashboard-title {
@@ -314,7 +406,8 @@ body {
 }
 
 @media (max-width: 560px) {
-  #plot3 { height: 1350px !important; }
+  #plot3 { height: 560px !important; }
+  .history-event-selector .radio-inline { flex-basis: 100%; }
   .ui.left.sidebar { width: 92px !important; }
   .ui.left.sidebar .item {
     padding-left: 9px !important;
@@ -337,6 +430,7 @@ body {
   .ui.statistic > .value { font-size: 1.45rem !important; }
   .ui.statistic > .label { font-size: 0.72rem !important; }
   .leaflet-control-layers { max-width: 210px; font-size: 11px; }
+  .source-footer { font-size: 0.74rem; }
 }
 .chart-subtitle {
   margin: 0 0 0.35rem;

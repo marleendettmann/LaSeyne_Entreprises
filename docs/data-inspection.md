@@ -12,6 +12,7 @@ bundle <- "data/app/insee_2026-11-17_grid500_privacy_v6_simplified"
 stock <- readRDS(file.path(bundle, "stock_aggregates.rds"))
 spatial <- readRDS(file.path(bundle, "spatial_aggregates.rds"))
 history_yearly <- readRDS(file.path(bundle, "history_yearly.rds"))
+creation_year_top8 <- readRDS(file.path(bundle, "creation_year_top8.rds"))
 
 sum(stock$section_stock$active_count)
 sum(stock$section_stock$address_exact_oo_count)
@@ -21,27 +22,37 @@ length(unique(spatial$grid_id))
 subset(history_yearly, year >= 2022)
 stock$creation_cohorts
 stopifnot(sum(stock$creation_cohorts$count) == 14213L)
+stopifnot(nrow(creation_year_top8) == 96L)
+stopifnot(min(creation_year_top8$count) == 13L)
 ```
 
 Das Bundle enthält keine Betriebsstättenzeilen. Die räumliche Tabelle enthält
 ausschließlich Zellkennung, NAF-Abschnitt, freigegebene Fallzahl und einen aus
 Raster- und Landgeometrie abgeleiteten Darstellungsanker. Jede veröffentlichte
 Zell-/Abschnittskombination hat mindestens fünf Fälle. SIREN/SIRET, Namen,
-Adressen, Einzelkoordinaten, Jahr-Branche-Zellen, Detail-NAF und Rechtsformen
-sind nicht enthalten. Die sieben Erstellungszeitraum-Kohorten sind ausschließlich
+Adressen, Einzelkoordinaten, Detail-NAF und Rechtsformen sind nicht enthalten.
+Die einzige Jahr-Branche-Tabelle enthält genau die 96 freigegebenen Werte für
+die acht größten Abschnitte und 2015–2026; die vollständige interne Tabelle ist
+nicht enthalten. Die sieben Erstellungszeitraum-Kohorten sind ausschließlich
 gemeindeweite Aggregate.
 
 Eine zusätzliche Schema- und Datenschutzprüfung ist möglich mit:
 
 ```r
 source("R/app_runtime.R")
-check <- validate_public_runtime_data(stock, spatial, history_yearly)
+check <- validate_public_runtime_data(
+  stock, spatial, history_yearly, creation_year_top8
+)
 stopifnot(check$valid)
 ```
 
-## Validierte öffentliche Quellsnapshots
+## Interne Zwischenprodukte aus öffentlich zugänglichen Ausgangsdaten
 
-Das App-Bundle wurde reproduzierbar aus diesen unveränderten öffentlichen Snapshots erzeugt:
+Die amtlichen SIRENE-Ausgangsdaten sind öffentlich über INSEE zugänglich. Die
+daraus lokal erzeugten Betriebsstätten-Dateien sind dennoch interne,
+zeilenbezogene Arbeitsstände und weder Bestandteil des öffentlichen Repositorys
+noch des Deployments. Sie können ausschließlich im vollständigen lokalen
+Entwicklungsprojekt geprüft werden:
 
 ```r
 public_establishments <- readRDS(
@@ -58,9 +69,9 @@ stopifnot(all(is.na(public_establishments$longitude[
 ])))
 ```
 
-Diese älteren, zeilenbezogenen Dateien bleiben unveränderte interne
-Zwischenprodukte und gehören nicht mehr zum öffentlichen Release. Das neue
-App-Bundle ist eine separate, versionierte Aggregation.
+Diese zeilenbezogenen Dateien bleiben unveränderte interne Zwischenprodukte.
+Das öffentliche App-Bundle ist eine davon getrennte, versionierte Aggregation
+ohne Betriebsstätten-Einzelzeilen.
 
 ## Interne Validierungs- und Rohdaten
 
@@ -94,7 +105,8 @@ Interne Dateien dürfen nicht in ein öffentliches Deployment kopiert oder von d
 `scripts/prepare_simplified_public_bundle.R` erzeugt aus dem nicht
 veröffentlichten, intern validierten Vorgängerbundle und dem validierten
 aktuellen Bestand das vereinfachte Bundle
-mit gemeindeweiten Kohorten. Die vorgelagerte räumliche Aufbereitung bleibt ein
+mit gemeindeweiten Kohorten und der geprüften Top-8-Tabelle. Die vorgelagerte
+räumliche Aufbereitung und vollständige Jahr-Branche-Ableitung bleiben ein
 interner, nicht veröffentlichter Reproduktionsschritt. Das öffentliche Skript
 stellt keine API-Anfragen und verweigert das Überschreiben eines vorhandenen
 Bundles. Es ist deshalb kein eigenständig ausführbarer End-to-End-Aufbau aus

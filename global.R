@@ -5,8 +5,16 @@ library(scales)
 library(leaflet)
 library(semantic.dashboard)
 
-if (!exists("load_public_app_data", mode = "function", inherits = TRUE)) {
-  source("R/app_runtime.R", encoding = "UTF-8")
+required_runtime_functions <- c(
+  "load_public_app_data", "history_event_plot_series",
+  "creation_year_plot_data"
+)
+runtime_ready <- all(vapply(
+  required_runtime_functions,
+  exists, logical(1), mode = "function", inherits = FALSE
+))
+if (!runtime_ready) {
+  source("R/app_runtime.R", local = TRUE, encoding = "UTF-8")
 }
 
 app_bundle_dir <- "data/app/insee_2026-11-17_grid500_privacy_v6_simplified"
@@ -16,6 +24,7 @@ section_stock <- stock_aggregates$section_stock
 spatial_aggregates <- app_data$spatial
 released_grid_geometry <- released_grid_cells(spatial_aggregates)
 history_yearly <- app_data$history
+creation_year_top8 <- app_data$creation_year_top8
 geocoding_flow <- public_geocoding_flow_counts(stock_aggregates)
 creation_cohorts <- stock_aggregates$creation_cohorts
 

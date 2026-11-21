@@ -1,3 +1,15 @@
+server_runtime_functions <- c(
+  "history_event_plot_series", "creation_year_plot_data"
+)
+server_runtime_ready <- all(vapply(
+  server_runtime_functions,
+  exists, logical(1), mode = "function", inherits = FALSE
+)) && exists("creation_year_top8", inherits = FALSE) &&
+  is.data.frame(creation_year_top8) && nrow(creation_year_top8) == 96L
+if (!server_runtime_ready) {
+  source("global.R", local = TRUE, encoding = "UTF-8")
+}
+
 server <- function(input, output, session) {
   add_aggregate_layers <- function(map, section_code) {
     circles <- filter_spatial_aggregates(spatial_aggregates, section_code)
@@ -88,23 +100,12 @@ server <- function(input, output, session) {
   output$map_coverage <- renderUI({
     req(input$select_Sectio)
     coverage <- section_spatial_summary(section_stock, input$select_Sectio)
-    if (identical(coverage$section_code, "ALL")) {
-      detail <- paste0(
-        formatC(coverage$active, format = "d", big.mark = ","),
-        " active establishments \u00b7 ",
-        formatC(coverage$address_exact_oo, format = "d", big.mark = ","),
-        " address-exact O/O records in the internal map basis \u00b7 ",
-        formatC(coverage$spatial_released, format = "d", big.mark = ","),
-        " spatially published"
-      )
-    } else {
-      detail <- paste0(
-        formatC(coverage$active, format = "d", big.mark = ","),
-        " active establishments \u00b7 ",
-        formatC(coverage$spatial_released, format = "d", big.mark = ","),
-        " spatially published"
-      )
-    }
+    detail <- paste0(
+      formatC(coverage$active, format = "d", big.mark = ","),
+      " active establishments \u00b7 ",
+      formatC(coverage$spatial_released, format = "d", big.mark = ","),
+      " represented on the map"
+    )
     tags$div(
       class = "map-coverage-summary",
       tags$strong(paste0(coverage$section_code, " \u2014 ", coverage$section_label)),
@@ -162,10 +163,15 @@ server <- function(input, output, session) {
   })
 
   output$history_event_control <- renderUI({
-    radioButtons(
-      inputId = "select_RegClos", label = h3(" "),
-      choices = c("Administrative creations", "Administrative closures", "Reopenings"),
-      selected = "Administrative creations"
+    tags$div(
+      class = "history-event-selector",
+      radioButtons(
+        inputId = "select_RegClos", label = NULL,
+        choices = c(
+          "Administrative creations", "Administrative closures", "Reopenings"
+        ),
+        selected = "Administrative creations", inline = TRUE
+      )
     )
   })
 
@@ -191,15 +197,36 @@ server <- function(input, output, session) {
 
   output$plot1 <- renderPlotly({
     req(input$select_RegClos)
-    series <- history_event_series(history_yearly, input$select_RegClos)
-    series <- series[series$year >= history_start_year, , drop = FALSE]
-    plot <- ggplot(series, aes(x = year, y = value)) +
-      geom_area(fill = "#e08800", alpha = 0.8) +
-      geom_line(color = "#e08800") +
+    series <- history_event_plot_series(
+      history_yearly, input$select_RegClos, history_start_year
+    )
+    event_color <- c(
+      "Administrative creations" = "#9b9eb4",
+      "Administrative closures" = "#aebe39",
+      "Reopenings" = "#e08800"
+    )[[input$select_RegClos]]
+    series$tooltip <- paste0(
+      series$year, "<br>", input$select_RegClos, ": ",
+      formatC(series$value, format = "d", big.mark = ",")
+    )
+    plot <- ggplot(series, aes(
+      x = year, y = value, group = observed_run, text = tooltip
+    )) +
+      geom_area(fill = event_color, alpha = 0.72) +
+      geom_line(color = event_color, linewidth = 0.8) +
+      geom_point(color = event_color, size = 1.3) +
       scale_y_continuous(labels = comma_format(big.mark = ",", decimal.mark = ".", suffix = " ")) +
       labs(x = "Year", y = input$select_RegClos) +
-      theme_minimal(base_size = 12)
-    ggplotly(plot, tooltip = c("x", "y")) |>
+      theme_minimal(base_size = 12) +
+      theme(
+        plot.background = element_rect(fill = "white", color = NA),
+        panel.background = element_rect(fill = "white", color = NA),
+        panel.grid.minor = element_blank(),
+        panel.grid.major = element_line(color = "#e7e8ec", linewidth = 0.45),
+        axis.title.x = element_text(margin = margin(t = 10)),
+        axis.title.y = element_text(margin = margin(r = 10))
+      )
+    ggplotly(plot, tooltip = "text") |>
       plotly::layout(
         margin = list(l = 85, r = 35, b = 65, t = 45),
         xaxis = list(automargin = TRUE), yaxis = list(automargin = TRUE)
@@ -233,23 +260,23 @@ server <- function(input, output, session) {
   })
 
   output$plot3 <- renderPlotly({
-    cohorts <- creation_cohorts
-    cohorts$cohort <- factor(cohorts$cohort, levels = rev(cohorts$cohort))
-    cohorts$tooltip <- paste0(
-      as.character(cohorts$cohort), "<br>",
-      formatC(cohorts$count, format = "d", big.mark = ","), " establishments"
+    req(input$select_creation_year)
+    selected <- creation_year_plot_data(
+      creation_year_top8, input$select_creation_year
     )
-    plot <- ggplot(cohorts, aes(x = cohort, y = count, text = tooltip)) +
-      geom_col(fill = "#69b3a2", width = 0.68) +
-      geom_text(
-        aes(label = scales::comma(count)), hjust = -0.12,
-        color = "#4f5267", size = 3.6
+    selected$tooltip <- paste0(
+      selected$section_display, "<br>", selected$creation_year, "<br>",
+      formatC(selected$count, format = "d", big.mark = ","),
+      " active establishments"
+    )
+    plot <- ggplot(selected, aes(x = count, y = section_display, text = tooltip)) +
+      geom_segment(
+        aes(x = 0, xend = count, yend = section_display),
+        color = "#d8d9df", linewidth = 0.7
       ) +
-      coord_flip() +
-      labs(
-        x = NULL, y = "Active establishments"
-      ) +
-      scale_y_continuous(
+      geom_point(color = "#e08800", size = 3.4) +
+      labs(x = "Active establishments", y = NULL) +
+      scale_x_continuous(
         labels = comma_format(big.mark = ","),
         expand = expansion(mult = c(0, 0.12))
       ) +
@@ -257,13 +284,28 @@ server <- function(input, output, session) {
       theme(
         legend.position = "none",
         axis.text.y = element_text(size = 10),
-        axis.title.x = element_text(margin = margin(t = 12))
+        axis.title.x = element_text(margin = margin(t = 12)),
+        panel.grid.major.y = element_blank(),
+        panel.grid.minor = element_blank(),
+        plot.background = element_rect(fill = "white", color = NA),
+        panel.background = element_rect(fill = "white", color = NA)
       )
     ggplotly(plot, tooltip = "text") |>
       plotly::layout(
-        margin = list(l = 170, r = 55, b = 70, t = 70),
+        margin = list(l = 260, r = 45, b = 70, t = 35),
         xaxis = list(automargin = TRUE), yaxis = list(automargin = TRUE)
       ) |>
       plotly::config(displaylogo = FALSE, responsive = TRUE)
+  })
+
+  output$creation_year_note <- renderUI({
+    req(input$select_creation_year)
+    if (identical(as.integer(input$select_creation_year), 2026L)) {
+      tags$p(
+        class = "ui tiny text",
+        tags$strong("2026 is incomplete:"),
+        " figures cover 1 January to 17 November 2026."
+      )
+    }
   })
 }

@@ -16,8 +16,8 @@ derived from the official INSEE SIRENE register.
 - aggregate-only pop-ups with economic section and released count;
 - current-stock indicators and the unchanged municipality-wide retrospective
   annual register-event views for 1973–2026;
-- a seven-category municipality-wide creation-period profile of the active
-  establishment stock, without an economic-section breakdown;
+- a year-specific comparison for the eight largest NAF sections, using only
+  96 precomputed creation-year/section aggregates for 2015–2026;
 - a documented distinction between the complete statistical stock and the
   smaller, privacy-safe mapped subset;
 - no live SIRENE, BAN or IGN request when the application starts.
@@ -40,7 +40,7 @@ derived from the official INSEE SIRENE register.
 
 The analysis and snapshot reference date is **17 November 2026**. The public
 runtime contains only aggregate tables. Statistical totals cover 14,213 active
-establishments. The internal spatial basis contains 5,214 address-exact O/O
+establishments. The internal spatial-processing basis contains 5,214 address-exact O/O
 records; 4,272 are represented in 286 released 500 m cell-section aggregates.
 The app uses:
 
@@ -76,11 +76,12 @@ an uninterrupted retrospective series is analytically useful. The spatial
 `n >= 5` rule is therefore not presented as a universal threshold for every
 municipality-wide statistic.
 
-Creation periods describe establishments active on 17 November 2026 in seven
-municipality-wide cohorts. They cannot be combined with economic section,
-grid cell, geocoding quality or another establishment attribute. The SIRENE
-placeholder year 1900 is classified as unknown or undetermined, not as an
-actual creation year.
+The creation-year chart compares the eight largest economic sections, selected
+from the current active stock. Its 96 values describe establishments that are
+still active on 17 November 2026; they are not historical totals of all business
+creations. Every displayed value is at least 13. The chart has no map, legal-form,
+person-type or geocoding dimension. The seven municipality-wide creation cohorts
+remain in the stock aggregate but are not combined with the chart table.
 
 The 500 m analysis grid is fixed in Lambert-93 (`EPSG:2154`). Circles normally
 use the geometric cell centre. For three coastal cells whose centre lies over
@@ -95,10 +96,14 @@ the aggregate layers without resetting the current viewport.
 
 The spatial table contains only cell-section combinations with at least five
 address-exact O/O establishments. Its total view is calculated exclusively from
-those released combinations. It contains no uncut cell totals, suppressed
-residual categories, SIREN/SIRET, names, addresses, creation years, detailed NAF
-codes, legal forms or person types. The map is privacy-aware aggregation, not a
-claim of complete anonymity or legal certification.
+those released combinations. It contains no uncut cell totals or suppressed
+residual categories for individual grid cells. Because section-level
+aggregation-basis totals and released counts are public, the total excluded by
+the spatial threshold can be derived for an economic section, but not allocated
+to its suppressed grid cells. The table contains no SIREN/SIRET, names,
+addresses, creation years, detailed NAF codes, legal forms or person types. The
+map is privacy-aware aggregation, not a claim of complete anonymity or legal
+certification.
 
 See [`docs/methodology.md`](docs/methodology.md) for the complete definitions
 and [`docs/old-vs-new.md`](docs/old-vs-new.md) for the migration from the former
@@ -107,9 +112,9 @@ OpenDataSoft-based application.
 ## Requirements
 
 The release candidate is tested with **R 4.4.2**. The intended package
-environment is recorded in [`renv.lock`](renv.lock). Restoration from that
-lockfile has been checked only in the existing development environment, not yet
-on a clean machine. Direct runtime packages are:
+environment is recorded in [`renv.lock`](renv.lock), and restoration has been
+validated in the isolated Docker environment described below. Direct runtime
+packages are:
 
 - `shiny`, `semantic.dashboard` and `leaflet`;
 - `plotly`, `ggplot2` and `scales`;
@@ -133,8 +138,9 @@ renv::restore()
 shiny::runApp(".")
 ```
 
-The app loads only `stock_aggregates.rds`, `spatial_aggregates.rds` and the
-byte-identical existing `history_yearly.rds` from the versioned,
+The app loads only `stock_aggregates.rds`, `spatial_aggregates.rds`, the
+byte-identical existing `history_yearly.rds` and the approved 96-row
+`creation_year_top8.rds` from the versioned,
 publication-safe bundle in
 `data/app/insee_2026-11-17_grid500_privacy_v6_simplified/`. It does not require internal raw,
 processed, reference or geocoding-cache directories.
@@ -148,7 +154,8 @@ testthat::test_dir("tests/testthat")
 ```
 
 The public tests cover runtime-data loading, fixed stock and aggregate totals,
-NAF sections, creation cohorts, aggregate pop-ups, Sankey reconciliation,
+NAF sections, creation cohorts, the Top-8 creation-year table and plot payload,
+aggregate pop-ups, Sankey reconciliation,
 spatial suppression, annual controls and app construction. Internal reproduction and review tests remain local
 and are not part of the public repository.
 
@@ -163,7 +170,8 @@ The repository distinguishes three layers:
    which are intentionally excluded.
 
 Public schemas are validated independently for stock and creation-cohort
-aggregates, spatial aggregates and the annual total-register history. Internal establishment-row validation is part of the pipeline
+aggregates, the 96-row Top-8 creation-year table, spatial aggregates and the
+annual total-register history. Internal establishment-row validation is part of the pipeline
 and is not sourced when the app starts.
 
 The repository is sufficient to run and test the app with the supplied
@@ -175,10 +183,14 @@ never refreshes its data automatically. A new reference date requires an
 explicit authenticated pipeline run, validation and creation of a new
 versioned public snapshot.
 
-The lockfile was checked locally against R 4.4.2 and the packages detected for
-the public application. The isolated app and test suites run with the installed
-environment. A complete `renv::restore()` on a fresh computer has not yet been
-performed, so clean-machine restoration remains an explicit release limitation.
+The public tree from commit `6da3c4a` was validated in a fresh
+`rocker/r-ver:4.4.2` Docker environment on Linux/aarch64. `renv::restore()` used
+an empty temporary cache and library; all 120 lockfile package versions were
+confirmed, all 160 public tests passed, and the app returned HTTP 200. A final
+server start also succeeded with container networking disabled and without host
+package libraries or internal data. This validates installation and execution
+of the supplied public aggregates; it does not reproduce the separate internal
+INSEE extraction, establishment-level processing, geocoding or spatial build.
 
 ## Live application
 
