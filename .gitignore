@@ -1,0 +1,81 @@
+# Operating-system, editor and local R/RStudio state
+.DS_Store
+**/.DS_Store
+.Rproj.user/
+*.Rproj
+.Rhistory
+.RData
+.Ruserdata
+*.Rcheck/
+
+# Local renv state; renv.lock is intentionally public
+renv/library/
+renv/staging/
+renv/python/
+renv/sandbox/
+
+# Secrets, credentials and local environment configuration
+.Renviron
+.Renviron.*
+.env
+.env.*
+!.env.example
+.httr-oauth
+.secrets/
+credentials/
+*.pem
+*.key
+
+# Deployment metadata: deployment must use release/shinyapps-files.txt
+rsconnect/
+.rsconnect/
+
+# Backups, caches, logs and temporary files
+backups/
+cache/
+.cache/
+logs/
+*.log
+*.tmp
+*.bak
+*.backup
+*~
+
+# Original SIRENE responses, full snapshots and internal review data
+data/raw/
+data/processed/
+data/internal/
+
+# Downloaded BAN/NAF reference holdings and geocoding caches
+data/reference/
+**/geocoding*_cache*
+
+# Only the current validated, aggregate publication-safe runtime files are
+# eligible in data/app. Earlier row-level marker bundles remain ignored.
+data/app/**
+!data/app/insee_2026-11-17_grid500_privacy_v6_simplified/
+data/app/insee_2026-11-17_grid500_privacy_v6_simplified/**
+!data/app/insee_2026-11-17_grid500_privacy_v6_simplified/stock_aggregates.rds
+!data/app/insee_2026-11-17_grid500_privacy_v6_simplified/spatial_aggregates.rds
+!data/app/insee_2026-11-17_grid500_privacy_v6_simplified/history_yearly.rds
+
+# Internal analyses, generated outputs and legacy source data
+outputs/
+dataseed-sirene_mde.csv
+
+# Internal review and development-only source files/reports
+internal/
+legacy/
+scripts/analyze_grid_quality.R
+scripts/compare_geodata.R
+scripts/geocode_controlled_sample.R
+scripts/inspect_duplicate_coordinates.R
+scripts/prepare_internal_review_table.R
+docs/geodata-comparison.md
+docs/internal-coordinate-review.md
+docs/internal-review-table.md
+tests/testthat/test-app-data.R
+tests/testthat/test-internal-review-search.R
+
+# Print-only author artwork; only www/Logo_sRGB_WEB.jpg is public
+assets/source/
