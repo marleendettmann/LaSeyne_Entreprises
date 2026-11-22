@@ -115,7 +115,7 @@ See [Release validation](docs/release-validation.md) for further details.
 
 ## Live application
 
-The updated application will be available on shinyapps.io.
+[Open La Seyne Business Explorer](https://marleen-dettmann.shinyapps.io/LaSeyne_Entreprises/)
 
 ## License
 
