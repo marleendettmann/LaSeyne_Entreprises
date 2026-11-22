@@ -99,7 +99,7 @@ frow4 <- fluidRow(column(
     solidHeader = FALSE, collapsible = TRUE,
     tags$p(
       class = "chart-subtitle",
-      "Establishments active on 17 November 2026; eight largest sections by current stock."
+      "Creation year of establishments still active in November 2026; eight largest sections by current stock."
     ),
     plotlyOutput("plot3", height = "460px"),
     sliderInput("select_creation_year", "", 2015L, 2026L, 2026L, step = 1L, sep = ""),
